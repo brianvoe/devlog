@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script>
+            setInterval(function() {
+                fetch("http://localhost:8080/getdata")
+                .then(function(resp) {return resp.json()})
+                .then(function(json) {
+                    var data = document.getElementById("data");
+                    data.innerHTML = "";
+                    for (let i = 0; i < json.length; i++) {
+                        var item = document.createElement("div");
+                        item.classList.add("item");
+                        item.classList.add(json[i].level);
+                        item.innerHTML = syntaxHighlight(json[i]);
+                        data.appendChild(item);
+                    }
+                });
+            }, 5000);
+
+            function syntaxHighlight(json) {
+                console.log(typeof json)
+                if (typeof json != 'string') { json = JSON.stringify(json, undefined, 2); }
+                json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                    var cls = 'number';
+                    if (/^"/.test(match)) {
+                        if (/:$/.test(match)) { cls = 'key'; } else { cls = 'string'; }
+                    } else if (/true|false/.test(match)) {
+                        cls = 'boolean';
+                    } else if (/null/.test(match)) {
+                        cls = 'null';
+                    }
+                    return '<span class="' + cls + '">' + match + '</span>';
+                });
+            }
+        </script>
+        <style>
+            pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+            .string { color: green; }
+            .number { color: darkorange; }
+            .boolean { color: blue; }
+            .null { color: magenta; }
+            .key { color: grey; }
+
+            .item {
+                padding: 8px;
+                margin: 0 0 8px 0;
+                border-radius: 4px;
+                border: solid 1px #cccccc;
+            }
+
+            .item.info { background-color: #cce5ff; }
+            .item.warning { background-color: #fff3cd; }
+            .item.error { background-color: #f8d7da; }
+        </style>
+    </head>
+    <body>
+        <div class="app">
+            <div id="data"></div>
+        </div>
+    </body>
+</html>
