@@ -2,25 +2,45 @@
 <html>
     <head>
         <script>
-            setInterval(function() {
-                fetch("http://localhost:8080/getdata")
+            // setInterval(function() {
+            //     getData()
+            // }, 5000);
+            getData();
+
+            function getData() {
+                fetch("http://localhost:8888/getdata")
                 .then(function(resp) {return resp.json()})
                 .then(function(json) {
                     var data = document.getElementById("data");
                     data.innerHTML = "";
                     for (let i = 0; i < json.length; i++) {
-                        var item = document.createElement("div");
-                        item.classList.add("item");
-                        item.classList.add(json[i].level);
-                        item.innerHTML = syntaxHighlight(json[i]);
-                        data.appendChild(item);
+                        addItem(json[i]);
                     }
                 });
-            }, 5000);
+            }
+
+            function addItem(json) {
+                var item = document.createElement("div");
+                item.classList.add("item");
+                item.classList.add(json.level);
+
+                // Toggle hide/show exploded
+                item.onclick = function() {
+                    item.classList.toggle("long");
+                }
+
+                // Add exploded(multiline) code
+                exploded = document.createElement("pre");
+                exploded.innerHTML = syntaxHighlight(json.data);
+                item.appendChild(exploded);
+
+                // Add item to data
+                document.getElementById("data").appendChild(item);
+            }
 
             function syntaxHighlight(json) {
-                console.log(typeof json)
-                if (typeof json != 'string') { json = JSON.stringify(json, undefined, 2); }
+                if (typeof json == 'string') { json = JSON.parse(json) }
+                if (typeof json != 'string') { json = JSON.stringify(json, null, 2); }
                 json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
                     var cls = 'number';
@@ -36,27 +56,39 @@
             }
         </script>
         <style>
-            pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
-            .string { color: green; }
-            .number { color: darkorange; }
-            .boolean { color: blue; }
-            .null { color: magenta; }
-            .key { color: grey; }
+            .app {
+                margin: 0 auto;
+                min-width: 400px;
+                max-width: 800px;
+            }
 
             .item {
                 padding: 8px;
                 margin: 0 0 8px 0;
                 border-radius: 4px;
                 border: solid 1px #cccccc;
+                cursor: pointer;
+                overflow: auto;
             }
 
             .item.info { background-color: #cce5ff; }
-            .item.warning { background-color: #fff3cd; }
+            .item.warn { background-color: #fff3cd; }
             .item.error { background-color: #f8d7da; }
+
+            pre { white-space: normal; padding: 0px; margin: 0px; }
+            .item.long pre { white-space: pre-wrap; }
+            .key { color: grey; }
+            .string { color: green; }
+            .number { color: darkorange; }
+            .boolean { color: blue; }
+            .null { color: magenta; }
         </style>
     </head>
     <body>
         <div class="app">
+            <div class="options">
+
+            </div>
             <div id="data"></div>
         </div>
     </body>
