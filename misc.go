@@ -5,9 +5,9 @@ import (
 	"encoding/hex"
 )
 
-// UUID (version 4) will generate a random unique identifier based upon random nunbers
+// uuid (version 4) will generate a random unique identifier based upon random nunbers
 // Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-func UUID() string {
+func uuid() string {
 	version := byte(4)
 	uuid := make([]byte, 16)
 	rand.Read(uuid)
@@ -31,4 +31,14 @@ func UUID() string {
 	hex.Encode(buf[24:], uuid[10:])
 
 	return string(buf)
+}
+
+// contains tells whether a contains x.
+func contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
 }

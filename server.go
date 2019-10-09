@@ -7,20 +7,9 @@ import (
 	"log"
 	"net/http"
 	"sort"
-	"sync"
 	"text/template"
 	"time"
 )
-
-// Data is the primary struct that contains the main information
-type Data struct {
-	ID        string `json:"id"`
-	Level     string `json:"level"`
-	Data      string `json:"data"`
-	CreatedAt int    `json:"created_at"`
-}
-
-var DataMap sync.Map
 
 // GetHTML will get the index html file
 func GetHTML(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +35,7 @@ func GetData(w http.ResponseWriter, r *http.Request) {
 
 	// Json unmarshal to data
 	d := struct {
-		Level string `json:"level"`
+		Levels []string `json:"levels"`
 	}{}
 	if err := json.Unmarshal(body, &d); err != nil {
 		http.Error(w, "Error unmarshalling data", http.StatusInternalServerError)
@@ -55,7 +44,9 @@ func GetData(w http.ResponseWriter, r *http.Request) {
 
 	out := []Data{}
 	DataMap.Range(func(key interface{}, value interface{}) bool {
-		out = append([]Data{value.(Data)}, out...)
+		if contains(d.Levels, (value.(Data)).Level) {
+			out = append([]Data{value.(Data)}, out...)
+		}
 		return true
 	})
 
@@ -87,12 +78,12 @@ func AddData(w http.ResponseWriter, r *http.Request) {
 	// Json unmarshal to data
 	d := Data{}
 	if err := json.Unmarshal(body, &d); err != nil {
-		http.Error(w, "Error unmarshalling data", http.StatusInternalServerError)
+		http.Error(w, "Error unmarshalling data: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Set ID/CreateAt
-	d.ID = UUID()
+	d.ID = uuid()
 	d.CreatedAt = time.Now().Nanosecond()
 
 	// Store data
@@ -102,9 +93,10 @@ func AddData(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Success")
 }
 
+// Server is the function that starts an http server
 func Server() {
-	http.HandleFunc("/html", GetHTML)
 	http.HandleFunc("/getdata", GetData)
 	http.HandleFunc("/adddata", AddData)
+	http.HandleFunc("/", GetHTML)
 	log.Fatal(http.ListenAndServe(":8888", nil))
 }
