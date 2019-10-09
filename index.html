@@ -5,16 +5,17 @@
             var levels = ['info', 'debug', 'warn', 'error'];
 
             // Long poll for new data
-            setInterval(function() {
-                getData()
-            }, 5000);
+            setInterval(function() { getData() }, 5000);
             getData();
 
             function toggleLevel(level) {
                 var option = document.getElementById("option_"+level)
                 
                 if (levels.includes(level)) {
-                    levels.pop(level);
+                    var li = levels.indexOf(level);
+                    if (li > -1) {
+                        levels.splice(li, 1);
+                    }
                     option.classList.remove("selected");
                 } else {
                     levels.push(level);

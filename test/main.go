@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/devlog"
+	"github.com/brianvoe/gofakeit/v4"
 )
 
 func main() {
@@ -16,11 +17,12 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 	for {
-		request, err := json.Marshal(map[string]interface{}{
-			"level": "info",
-			"data": map[string]interface{}{
-				"number": rand.Intn(100000000),
-			},
+		request, err := json.Marshal(struct {
+			Level string      `json:"level"`
+			Data  interface{} `json:"data"`
+		}{
+			Level: gofakeit.RandString([]string{"info", "debug", "warn", "error"}),
+			Data:  gofakeit.Map(),
 		})
 		if err != nil {
 			log.Fatalln(err)

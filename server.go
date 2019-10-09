@@ -14,7 +14,10 @@ import (
 // GetHTML will get the index html file
 func GetHTML(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	t, _ := template.ParseFiles("../index.html")
+	t, err := template.ParseFiles("../index.html")
+	if err != nil {
+		fmt.Printf("%s", err)
+	}
 	t.Execute(w, nil)
 }
 
