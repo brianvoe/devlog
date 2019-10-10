@@ -14,7 +14,7 @@ import (
 // GetHTML will get the index html file
 func GetHTML(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	t, err := template.ParseFiles("../index.html")
+	t, err := template.New("index.html").Delims("---------", "---------").ParseFiles("../index.html")
 	if err != nil {
 		fmt.Printf("%s", err)
 	}
@@ -50,6 +50,7 @@ func GetData(w http.ResponseWriter, r *http.Request) {
 		if contains(d.Levels, (value.(Data)).Level) {
 			out = append([]Data{value.(Data)}, out...)
 		}
+
 		return true
 	})
 
@@ -57,6 +58,13 @@ func GetData(w http.ResponseWriter, r *http.Request) {
 	sort.SliceStable(out, func(i, j int) bool {
 		return out[i].CreatedAt > out[j].CreatedAt
 	})
+
+	// Check data size and limit
+	if len(out) > 500 {
+		for i := 501; i < len(out); i++ {
+			DataMap.Delete(out[i].ID)
+		}
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -87,7 +95,7 @@ func AddData(w http.ResponseWriter, r *http.Request) {
 
 	// Set ID/CreateAt
 	d.ID = uuid()
-	d.CreatedAt = time.Now().Nanosecond()
+	d.CreatedAt = time.Now().UnixNano() / 1e6
 
 	// Store data
 	DataMap.Store(d.ID, d)

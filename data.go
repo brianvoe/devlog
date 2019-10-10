@@ -7,7 +7,7 @@ type Data struct {
 	ID        string      `json:"id"`
 	Level     string      `json:"level"`
 	Data      interface{} `json:"data"`
-	CreatedAt int         `json:"created_at"`
+	CreatedAt int64       `json:"created_at"`
 }
 
 // DataMap is the primary map where we store the data
