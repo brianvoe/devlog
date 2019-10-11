@@ -1,3 +1,6 @@
+package devlog
+
+var indexHTML = `
 <!DOCTYPE html>
 <html>
     <head>
@@ -200,3 +203,4 @@
         </div>
     </body>
 </html>
+`

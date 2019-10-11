@@ -7,18 +7,21 @@ import (
 	"log"
 	"net/http"
 	"sort"
-	"text/template"
 	"time"
 )
 
 // GetHTML will get the index html file
 func GetHTML(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	t, err := template.New("index.html").Delims("---------", "---------").ParseFiles("../index.html")
-	if err != nil {
-		fmt.Printf("%s", err)
-	}
-	t.Execute(w, nil)
+	// w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	// t, err := template.New("index.html").Delims("---------", "---------").ParseFiles("../index.html")
+	// if err != nil {
+	// 	fmt.Printf("%s", err)
+	// }
+	// t.Execute(w, nil)
+	// return
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Fprint(w, indexHTML)
 }
 
 // GetData will get the current data set and return it back
@@ -95,7 +98,7 @@ func AddData(w http.ResponseWriter, r *http.Request) {
 
 	// Set ID/CreateAt
 	d.ID = uuid()
-	d.CreatedAt = time.Now().UnixNano() / 1e6
+	d.CreatedAt = time.Now().UnixNano()
 
 	// Store data
 	DataMap.Store(d.ID, d)

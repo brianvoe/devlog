@@ -28,7 +28,12 @@ func main() {
 			log.Fatalln(err)
 		}
 
-		http.Post("http://localhost:8888/adddata", "application/json", bytes.NewBuffer(request))
+		client := http.Client{Timeout: time.Second * 2}
+		resp, err := client.Post("http://localhost:8888/adddata", "application/json", bytes.NewBuffer(request))
+		if err != nil {
+			panic(err)
+		}
+		resp.Body.Close()
 
 		// Random sleep
 		time.Sleep(time.Duration(rand.Intn(4)) * time.Second)
