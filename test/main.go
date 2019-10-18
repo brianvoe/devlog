@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -13,7 +14,8 @@ import (
 )
 
 func main() {
-	go devlog.Server()
+	const port string = "8888"
+	go devlog.Server(port)
 
 	rand.Seed(time.Now().UnixNano())
 	for {
@@ -29,11 +31,13 @@ func main() {
 		}
 
 		client := http.Client{Timeout: time.Second * 2}
-		resp, err := client.Post("http://localhost:8888/adddata", "application/json", bytes.NewBuffer(request))
+		resp, err := client.Post("http://localhost:"+port+"/adddata", "application/json", bytes.NewBuffer(request))
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
-		resp.Body.Close()
+		if resp.Body != nil {
+			resp.Body.Close()
+		}
 
 		// Random sleep
 		time.Sleep(time.Duration(rand.Intn(4)) * time.Second)

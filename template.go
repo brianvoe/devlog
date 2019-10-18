@@ -11,6 +11,7 @@ var indexHTML = `
                     el: '#app',
                     data() {
                         return {
+                            port: '<--.Port-->',
                             levels: ['info', 'debug', 'warn', 'error'],
                             data: [],
                             selected: [],
