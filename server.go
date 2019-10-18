@@ -1,27 +1,32 @@
 package devlog
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"sort"
+	"strings"
 	"time"
 )
+
+var port string = ""
 
 // GetHTML will get the index html file
 func GetHTML(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	// t, err := template.New("index.html").Delims("---------", "---------").ParseFiles("../index.html")
+	// t, err := template.New("index.html").Delims("<--", "-->").ParseFiles("../index.html")
 	// if err != nil {
 	// 	fmt.Printf("%s", err)
 	// }
-	// t.Execute(w, nil)
+	// t.Execute(w, struct{ Port string }{Port: port})
 	// return
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, indexHTML)
+	fmt.Fprint(w, strings.Replace(indexHTML, "<--.Port-->", port, -1))
 }
 
 // GetData will get the current data set and return it back
@@ -108,9 +113,24 @@ func AddData(w http.ResponseWriter, r *http.Request) {
 }
 
 // Server is the function that starts an http server
-func Server() {
+func Server(portNum string) {
+	port = portNum // Set public port
+
+	// Set handlers
 	http.HandleFunc("/getdata", GetData)
 	http.HandleFunc("/adddata", AddData)
 	http.HandleFunc("/", GetHTML)
-	log.Fatal(http.ListenAndServe(":8888", nil))
+
+	var srv http.Server
+	srv.Addr = ":" + port
+
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		<-sigint
+
+		srv.Shutdown(context.Background())
+	}()
+
+	srv.ListenAndServe()
 }
